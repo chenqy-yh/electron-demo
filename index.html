@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Neural Network XOR Visualization</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r125/three.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        // set up the scene and camera
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(
+            75,
+            window.innerWidth / window.innerHeight,
+            0.1,
+            1000
+        );
+        camera.position.z = 5;
+
+        // create the neural network layers
+        const inputLayer = new THREE.Group();
+        const hiddenLayer = new THREE.Group();
+        const outputLayer = new THREE.Group();
+
+        // create the input nodes
+        const inputNode1 = createNode(-1, 1);
+        const inputNode2 = createNode(-1, -1);
+        inputLayer.add(inputNode1, inputNode2);
+
+        // create the hidden nodes
+        const hiddenNode1 = createNode(0, 1.5);
+        const hiddenNode2 = createNode(0, -1.5);
+        hiddenLayer.add(hiddenNode1, hiddenNode2);
+
+        // create the output node
+        const outputNode = createNode(1, 0);
+        outputLayer.add(outputNode);
+
+        // create the weights
+        const weight1 = createWeight(-0.5, 0.5);
+        const weight2 = createWeight(-0.5, 0.5);
+        const weight3 = createWeight(-0.5, 0.5);
+        const weight4 = createWeight(-0.5, 0.5);
+        const weight5 = createWeight(-0.5, 0.5);
+        const weight6 = createWeight(-0.5, 0.5);
+
+        // add the weights to the nodes
+        inputNode1.add(weight1, weight2);
+        inputNode2.add(weight3, weight4);
+        hiddenNode1.add(weight5);
+        hiddenNode2.add(weight6);
+
+        // add the layers to the scene
+        scene.add(inputLayer, hiddenLayer, outputLayer);
+
+        // create the renderer
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // animate the scene
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // calculate the output of the network for the XOR problem
+            const input1 = inputNode1.position.y;
+            const input2 = inputNode2.position.y;
+            const hidden1 =
+                sigmoid(input1 * weight1.scale.y + input2 * weight3.scale.y) *
+                weight5.scale.y;
+            const hidden2 =
+                sigmoid(input1 * weight2.scale.y + input2 * weight4.scale.y) *
+                weight6.scale.y;
+            const output = sigmoid(hidden1 + hidden2);
+
+            // change the color of the output node based on the output value
+            outputNode.material.color.setRGB(output, 0,
